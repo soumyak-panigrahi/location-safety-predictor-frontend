@@ -13,7 +13,9 @@ import Grid from "@mui/material/Grid";
 import styled from "styled-components";
 import axios from "axios";
 
-const FormContainer = styled("div")``;
+const FormContainer = styled("div")`
+  height: 500px;
+`;
 
 const Header = styled("h1")`
   font-size: 50px;
@@ -49,7 +51,11 @@ function MyApp() {
   const [position, setPosition] = useState([41.881832, -87.623177]);
   const [lat, long] = position;
   const [time, setTime] = useState(dayjs("2022-04-17T15:30"));
-  const [safety, setSafety] = useState({ score: "--", crime: "--" });
+  const [safety, setSafety] = useState({
+    score: "--",
+    crime: "--",
+    women: "--",
+  });
 
   function mapChangeHandler(pos) {
     setPosition(pos);
@@ -58,16 +64,16 @@ function MyApp() {
   async function submitHandler(e) {
     e.preventDefault();
     try {
-      // const URL = "https://location-safety.onrender.com/sentiment_score";
-      const URL = "http://127.0.0.1:8000/sentiment_score";
+      const URL = "https://location-safety.onrender.com/sentiment_score";
+      // const URL = "http://127.0.0.1:8000/sentiment_score";
       const val = await axios.post(URL, {
         lat: lat,
         long: long,
         hour: time.hour(),
         minute: time.minute(),
       });
-      const { score, crime } = val.data;
-      setSafety({ score, crime });
+      const { score, crime, women } = val.data;
+      setSafety({ score, crime, women });
     } catch (err) {
       console.log(err);
     }
@@ -76,7 +82,7 @@ function MyApp() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid height={"100vh"} width={"100vw"} container spacing={2}>
-        <Grid item xs={5}>
+        <Grid height={"100%"} width={"100%"} item xs={12} md={6} lg={5}>
           <FormContainer>
             <Header>Safety in Chicago</Header>
             <HeaderInfo>Predict your Safety</HeaderInfo>
@@ -114,16 +120,24 @@ function MyApp() {
             <Result>
               <ResultDespriction>
                 The Chances of being safe:
-                <ResultValue>{` ${safety.score}%`}</ResultValue>
+                <ResultValue>{` ${
+                  safety.score == "--" ? "--" : safety.score * 100
+                }%`}</ResultValue>
               </ResultDespriction>
               <ResultDespriction>
                 Most Probable Crime:
                 <ResultValue>{` ${safety.crime}`}</ResultValue>
               </ResultDespriction>
+              <ResultDespriction>
+                The Chances of being on Women:
+                <ResultValue>{` ${
+                  safety.women == "--" ? "--" : safety.women * 100
+                }%`}</ResultValue>
+              </ResultDespriction>
             </Result>
           </FormContainer>
         </Grid>
-        <Grid item xs={7}>
+        <Grid height={"100%"} width={"100%"} item xs={12} md={6} lg={7}>
           <Map position={position} onChange={mapChangeHandler} />
         </Grid>
       </Grid>
